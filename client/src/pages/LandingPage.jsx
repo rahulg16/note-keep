@@ -1,6 +1,6 @@
-import React from 'react'
-import NavBar from '../components/NavBar'
-import Banner from '../assets/landingPageBanner.jpg'
+import React from "react";
+import NavBar from "../components/NavBar";
+import Banner from "../assets/landingPageBanner.jpg";
 
 function LandingPage() {
   return (
@@ -10,11 +10,11 @@ function LandingPage() {
         <img
           src={Banner}
           alt="noe-keep-banner"
-          className="w-screen object-cover"
+          className="w-screen  h-[90vh] object-cover"
         />
       </div>
     </div>
   );
 }
 
-export default LandingPage
+export default LandingPage;
