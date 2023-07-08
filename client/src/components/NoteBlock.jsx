@@ -5,7 +5,7 @@ function NoteBlock({isSelected, onClick}) {
   return (
     <div
       className={`w-[100%] h-[9rem] px-2 py-2 mb-4 rounded-lg ${
-        isSelected ? "bg-gray-200" : "bg-gray-50"
+        isSelected ? "bg-gray-200" : "bg-[#fbfbfb]"
       }`}
       onClick={onClick}
     >
