@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import SearchBar from "../components/SearchBar";
 import NoteBlock from "../components/NoteBlock";
 import Button from "../components/Button";
@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { clearToken } from "../slices/userAuthSlice";
 import BASE_URL from "../serverInfo";
 import Alert from "../util/Alert";
+import MyModal from "../components/AddFolderModal";
 
 const HomeScreen = () => {
   const [selectedNote, setSelectedNote] = useState(false);
@@ -14,6 +15,7 @@ const HomeScreen = () => {
   let [userData, setUserData] = useState({});
   let [alertMessage, setAlertMessage] = useState("");
   let [alertType, setAlertType] = useState("");
+  let [isAddFolderOpen, setIsAddFolderOpen] = useState(false)
 
   const dispatch = useDispatch();
 
@@ -32,8 +34,12 @@ const HomeScreen = () => {
     }
   };
 
+  function closeModal() {
+    setIsAddFolderOpen(false);
+  }
+
   async function fetchUserDetails() {
-    let userID = await localStorage.getItem("_id");
+    let userID = localStorage.getItem("_id");
 
     await fetch(`${BASE_URL}/api/users/${userID}`)
       .then((res) => res.json())
@@ -44,22 +50,20 @@ const HomeScreen = () => {
   }
 
   async function addUserFolder() {
-    let userID = await localStorage.getItem("_id");
+    let userID = localStorage.getItem("_id");
 
     await fetch(`${BASE_URL}/api/users/`, {
       method: "PATCH", // HTTP method
       headers: {
         "Content-Type": "application/json",
-        folderName: "Journal",
-        id: userID,
-        // "Authorization": "Bearer YOUR_TOKEN",
       },
+      body: JSON.stringify({ folderName: "Journal", id: userID }),
     })
       .then((res) => res.json())
       .then((result) => {
-        setUserData(result?.data?.[0]);
+        console.log("addUserFolder", result);
       })
-      .catch((err) => console.log("Error -> fetchUserDetails:", err));
+      .catch((err) => console.log("Error -> addUserFolder:", err));
   }
 
   async function logOut() {
@@ -134,6 +138,7 @@ const HomeScreen = () => {
             }
             buttonName={"Add new folders"}
             isMore={false}
+            onClick={() => setIsAddFolderOpen((p) => !p)}
           />
 
           <Button
@@ -206,8 +211,14 @@ const HomeScreen = () => {
           </p>
         </div>
       </div>
-
-      {alertMessage.length > 0 && <Alert alertMessage={alertMessage} type={alertType} />}
+      <MyModal
+        isOpen={isAddFolderOpen}
+        closeModal={closeModal}
+        addUserFolder={addUserFolder}
+      />
+      {alertMessage.length > 0 && (
+        <Alert alertMessage={alertMessage} type={alertType} />
+      )}
     </div>
   );
 };
