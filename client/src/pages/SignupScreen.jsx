@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useSelector, useDispatch } from "react-redux";
 import { setToken } from "../slices/userAuthSlice.js";
+import BASE_URL from "../apiEndPoint.js";
 
 const initialState = {
   userName: "test",
@@ -38,7 +39,7 @@ const SignUpScreen = () => {
 
   const signUpUserHandler = async (e) => {
     const request = await fetch(
-      "http://www.localhost:5000/api/users/auth/signup",
+      `${BASE_URL}/api/users/auth/signup`,
       {
         headers: {
           "Content-Type": "application/json",

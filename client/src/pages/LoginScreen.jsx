@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useSelector, useDispatch } from "react-redux";
 import { setToken } from "../slices/userAuthSlice.js";
+import BASE_URL from "../apiEndPoint.js";
 
 const LoginScreen = () => {
   const token = useSelector((state) => state.auth.token);
@@ -21,7 +22,7 @@ const LoginScreen = () => {
     };
 
     const request = await fetch(
-      "http://www.localhost:5000/api/users/auth/login",
+      `${BASE_URL}/api/users/auth/login`,
       {
         headers: {
           "Content-Type": "application/json",
