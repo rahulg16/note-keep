@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema({
       message: "Passwords are not the same",
     },
   },
+
+  userFolder: {
+    type: [String]
+  }
 });
 
 // Document middleware
