@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useSelector, useDispatch } from "react-redux";
 import { setToken } from "../slices/userAuthSlice.js";
-import BASE_URL from "../apiEndPoint.js";
+import BASE_URL from "../serverInfo.js";
 
 const LoginScreen = () => {
   const token = useSelector((state) => state.auth.token);
@@ -21,22 +21,21 @@ const LoginScreen = () => {
       password: passwordRef.current.value,
     };
 
-    const request = await fetch(
-      `${BASE_URL}/api/users/auth/login`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        method: "POST",
-        body: JSON.stringify(data),
-      }
-    );
+    const request = await fetch(`${BASE_URL}/api/users/auth/login`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify(data),
+    });
 
     const response = await request.json();
 
     if (response.message === "success") {
       const token = response?.token;
+      const userID = response?.data?.id;
       localStorage.setItem("auth", token);
+      localStorage.setItem("_id", userID);
       dispatch(setToken(token));
       navigate("/");
     }
