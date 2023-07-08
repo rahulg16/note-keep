@@ -1,8 +1,7 @@
 import Users from "../models/userModel.js";
 
-const getUserDetails = async (req, res) => {
-
-  let allUsers = await Users.find({})
+const getAllUserDetails = async (req, res) => {
+  let allUsers = await Users.find({});
 
   try {
     res.status(200).json({
@@ -22,13 +21,13 @@ const addUserFolder = async (req, res) => {
 
   let user = await Users.findByIdAndUpdate(
     { _id: id },
-    { $push: { userFolder: folderName } }
+    { $push: { userFolders: folderName } }
   );
 
   try {
     res.status(200).json({
       message: "success",
-      data: user
+      data: user,
     });
   } catch (err) {
     res.status(200).json({
@@ -38,4 +37,22 @@ const addUserFolder = async (req, res) => {
   }
 };
 
-export { getUserDetails, addUserFolder };
+const getUserDetails = async (req, res) => {
+  let { id } = req.params;
+
+  let user = await Users.find({ _id: id });
+
+  try {
+    res.status(200).json({
+      message: "success",
+      data: user,
+    });
+  } catch (err) {
+    res.status(200).json({
+      message: "fail",
+      data: err.message,
+    });
+  }
+};
+
+export { getAllUserDetails, addUserFolder, getUserDetails };

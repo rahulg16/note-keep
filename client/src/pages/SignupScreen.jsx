@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useSelector, useDispatch } from "react-redux";
 import { setToken } from "../slices/userAuthSlice.js";
-import BASE_URL from "../apiEndPoint.js";
+import BASE_URL from "../serverInfo.js";
 
 const initialState = {
   userName: "test",
@@ -38,16 +38,13 @@ const SignUpScreen = () => {
   const navigate = useNavigate();
 
   const signUpUserHandler = async (e) => {
-    const request = await fetch(
-      `${BASE_URL}/api/users/auth/signup`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        method: "POST",
-        body: JSON.stringify(userData),
-      }
-    );
+    const request = await fetch(`${BASE_URL}/api/users/auth/signup`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify(userData),
+    });
 
     const response = await request.json();
 

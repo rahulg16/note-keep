@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema({
     },
   },
 
-  userFolder: {
+  userFolders: {
     type: [String]
   }
 });
