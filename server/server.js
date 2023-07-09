@@ -13,6 +13,6 @@ const DB = process.env.DB_CONNECTION.replace(
 
 mongoose.connect(DB).then(() => {
   console.log("connected to DB");
-});
+}).catch(err => console.log("Connection to DB failed: ", err));
 
 app.listen(port, console.log(`server started at port ${port}`));

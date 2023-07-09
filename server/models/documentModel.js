@@ -27,12 +27,12 @@ const documentSchema = new mongoose.Schema({
 
   tags: {
     type: [String],
-    required: [true, "An document must have an tag"],
+    required: false,
   },
 
   heading: {
     type: String,
-    required: [true, "An document must have an heading"],
+    required: false,
   },
 
   description: {

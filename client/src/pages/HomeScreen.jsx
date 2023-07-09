@@ -7,15 +7,18 @@ import { clearToken } from "../slices/userAuthSlice";
 import BASE_URL from "../serverInfo";
 import Alert from "../util/Alert";
 import MyModal from "../components/AddFolderModal";
+import AddNoteModal from "../components/AddNoteModal";
 
 import {
   setFolder,
   clearFolderName,
   addFolderName,
+  setSelectedFolderName,
 } from "../slices/userFolderSlice";
 
 const HomeScreen = () => {
   const folders = useSelector((state) => state.folder.folder);
+  const folderName = useSelector((state) => state.folder.selectedFolder);
 
   const [selectedNote, setSelectedNote] = useState(false);
   const [notes, setNotes] = useState([]);
@@ -23,9 +26,18 @@ const HomeScreen = () => {
   let [userData, setUserData] = useState({});
   let [alertMessage, setAlertMessage] = useState("");
   let [alertType, setAlertType] = useState("");
-  let [isAddFolderOpen, setIsAddFolderOpen] = useState(false);
+  let [isAddFolderOpen, setIsAddFolderOpen] = useState(false)
+  let [isAddNoteOpen, setIsAddNoteOpen] = useState(false);
 
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    fetchUserDetails();
+  }, []);
+
+  useEffect(() => {
+    fetchUserNotes(folderName);
+  }, [folderName]);
 
   const handleNoteClick = (note) => {
     setSelectedNote(note);
@@ -42,10 +54,8 @@ const HomeScreen = () => {
   }
 
   const handleAddNote = () => {
-    if (newNote.trim() !== "") {
-      setNotes([...notes, newNote]);
-      setNewNote("");
-    }
+
+    setIsAddNoteOpen(true)
   };
 
   function closeModal() {
@@ -60,6 +70,19 @@ const HomeScreen = () => {
       .then((result) => {
         setUserData(result?.data?.[0]);
         dispatch(setFolder(result?.data?.[0].userFolders));
+      })
+      .catch((err) => console.log("Error -> fetchUserDetails:", err));
+  }
+
+
+  async function fetchUserNotes(queryType) {
+    let userID = localStorage.getItem("_id");
+
+    await fetch(`${BASE_URL}/api/users/note/${userID}?type=${queryType}`)
+      .then((res) => res.json())
+      .then((result) => {
+        console.log("fetchUserNotes result", result);
+        setNotes(result?.data);
       })
       .catch((err) => console.log("Error -> fetchUserDetails:", err));
   }
@@ -88,14 +111,44 @@ const HomeScreen = () => {
       .catch((err) => console.log("Error -> addUserFolder:", err));
   }
 
+  async function addNewNote(title, description) {
+    let userID = localStorage.getItem("_id");
+
+    if (title.length == 0 || description.length == 0) {
+      return;
+    }
+
+    await fetch(`${BASE_URL}/api/users/note`, {
+      method: "POST", // HTTP method
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        authorId: userID,
+        type: "My Notes",
+        title: title,
+        description: description,
+      }),
+    })
+      .then((res) => res.json())
+      .then((result) => {
+        console.log("addUserFolder", result);
+        setNotes((prevNotes) => [
+          ...prevNotes,
+          {
+            id: document._id,
+            title: title,
+            description: description
+          },
+        ]);
+      })
+      .catch((err) => console.log("Error -> addUserFolder:", err));
+  }
+
   async function logOut() {
     dispatch(clearToken(localStorage.clear("auth")));
     location.reload();
   }
-
-  useEffect(() => {
-    fetchUserDetails();
-  }, []);
 
   return (
     <div className="flex w-screen h-screen bg-gray-200">
@@ -138,6 +191,7 @@ const HomeScreen = () => {
                   }
                   buttonName={data}
                   isMore={true}
+                  onClick={() => dispatch(setSelectedFolderName(data))}
                 />
               );
             })}
@@ -218,10 +272,17 @@ const HomeScreen = () => {
         </div>
 
         <div className="flex flex-col min-h-[80%]">
-          <NoteBlock
-            onClick={() => setSelectedNote((p) => !p)}
-            isSelected={selectedNote}
-          />
+          {notes.map((note, index) => {
+            return (
+              <NoteBlock
+                key={index}
+                title={note.title}
+                description={note.description}
+                onClick={() => setSelectedNote((p) => !p)}
+                isSelected={selectedNote}
+              />
+            );
+          })}
         </div>
       </div>
       {/* Right Column */}
@@ -242,6 +303,13 @@ const HomeScreen = () => {
         closeModal={closeModal}
         addUserFolder={addUserFolder}
       />
+
+      <AddNoteModal
+        isOpen={isAddNoteOpen}
+        closeModal={() => setIsAddNoteOpen(false)}
+        addNewNote={addNewNote}
+      />
+
       {alertMessage.length > 0 && (
         <Alert alertMessage={alertMessage} type={alertType} />
       )}

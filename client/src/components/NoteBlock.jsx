@@ -1,6 +1,6 @@
 import React from 'react'
 
-function NoteBlock({isSelected, onClick}) {
+function NoteBlock({isSelected, onClick, title, description, date}) {
 
   return (
     <div
@@ -21,14 +21,14 @@ function NoteBlock({isSelected, onClick}) {
           isSelected ? "text-black" : "text-gray-400"
         }`}
       >
-        Exploration ideas
+        {title}
       </h2>
       <p
         className={`font-bold text-sm ${
           isSelected ? "text-black" : "text-gray-400"
         } break-words`}
       >
-        skfdlksdjffsdfjsdlkfklsdjfksdjflksjdlfjsdlfkjsdlkjflskdjflsdjlfkjsdlkf
+        {description}
       </p>
     </div>
   );
