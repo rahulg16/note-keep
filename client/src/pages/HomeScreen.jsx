@@ -13,10 +13,12 @@ import {
   setFolder,
   clearFolderName,
   addFolderName,
+  setSelectedFolderName,
 } from "../slices/userFolderSlice";
 
 const HomeScreen = () => {
   const folders = useSelector((state) => state.folder.folder);
+  const folderName = useSelector((state) => state.folder.selectedFolder);
 
   const [selectedNote, setSelectedNote] = useState(false);
   const [notes, setNotes] = useState([]);
@@ -31,8 +33,11 @@ const HomeScreen = () => {
 
   useEffect(() => {
     fetchUserDetails();
-    fetchUserNotes("My Notes");
   }, []);
+
+  useEffect(() => {
+    fetchUserNotes(folderName);
+  }, [folderName]);
 
   const handleNoteClick = (note) => {
     setSelectedNote(note);
@@ -49,10 +54,7 @@ const HomeScreen = () => {
   }
 
   const handleAddNote = () => {
-    // if (newNote.trim() !== "") {
-    //   setNotes([...notes, newNote]);
-    //   setNewNote("");
-    // }
+
     setIsAddNoteOpen(true)
   };
 
@@ -148,10 +150,6 @@ const HomeScreen = () => {
     location.reload();
   }
 
-  useEffect(() => {
-    fetchUserDetails();
-  }, []);
-
   return (
     <div className="flex w-screen h-screen bg-gray-200">
       {/* Left Column */}
@@ -193,6 +191,7 @@ const HomeScreen = () => {
                   }
                   buttonName={data}
                   isMore={true}
+                  onClick={() => dispatch(setSelectedFolderName(data))}
                 />
               );
             })}
