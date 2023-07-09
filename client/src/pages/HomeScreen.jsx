@@ -8,24 +8,38 @@ import BASE_URL from "../serverInfo";
 import Alert from "../util/Alert";
 import MyModal from "../components/AddFolderModal";
 
+import {
+  setFolder,
+  clearFolderName,
+  addFolderName,
+} from "../slices/userFolderSlice";
+
 const HomeScreen = () => {
+  const folders = useSelector((state) => state.folder.folder);
+
   const [selectedNote, setSelectedNote] = useState(false);
   const [notes, setNotes] = useState([]);
   const [newNote, setNewNote] = useState("");
   let [userData, setUserData] = useState({});
   let [alertMessage, setAlertMessage] = useState("");
   let [alertType, setAlertType] = useState("");
-  let [isAddFolderOpen, setIsAddFolderOpen] = useState(false)
+  let [isAddFolderOpen, setIsAddFolderOpen] = useState(false);
 
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    fetchUserDetails();
-  }, []);
 
   const handleNoteClick = (note) => {
     setSelectedNote(note);
   };
+
+  function showAlertPopup(alertMsg, type) {
+    setAlertMessage(alertMsg);
+    setAlertType(type);
+
+    setTimeout(() => {
+      setAlertMessage("");
+      setAlertType("");
+    }, 2000);
+  }
 
   const handleAddNote = () => {
     if (newNote.trim() !== "") {
@@ -45,23 +59,31 @@ const HomeScreen = () => {
       .then((res) => res.json())
       .then((result) => {
         setUserData(result?.data?.[0]);
+        dispatch(setFolder(result?.data?.[0].userFolders));
       })
       .catch((err) => console.log("Error -> fetchUserDetails:", err));
   }
 
-  async function addUserFolder() {
+  async function addUserFolder(folderName) {
     let userID = localStorage.getItem("_id");
+
+    if (folderName.length === 0) {
+      showAlertPopup("Enter valid folder name", "warning");
+      throw new Error("Enter Folder name");
+    }
 
     await fetch(`${BASE_URL}/api/users/`, {
       method: "PATCH", // HTTP method
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ folderName: "Journal", id: userID }),
+      body: JSON.stringify({ folderName, id: userID }),
     })
       .then((res) => res.json())
       .then((result) => {
         console.log("addUserFolder", result);
+        if (result.message === "fail") throw new Error("practice more");
+        dispatch(addFolderName(folderName));
       })
       .catch((err) => console.log("Error -> addUserFolder:", err));
   }
@@ -70,6 +92,10 @@ const HomeScreen = () => {
     dispatch(clearToken(localStorage.clear("auth")));
     location.reload();
   }
+
+  useEffect(() => {
+    fetchUserDetails();
+  }, []);
 
   return (
     <div className="flex w-screen h-screen bg-gray-200">
@@ -89,8 +115,8 @@ const HomeScreen = () => {
             <SearchBar />
           </div>
 
-          <div className="w-[100%] flex-1 mt-10">
-            {userData?.userFolder?.map((data, index) => {
+          <div className="w-[100%] flex-1 mt-10 h-[50vh] overflow-y-auto scrollbar-hide ">
+            {folders.map((data, index) => {
               return (
                 <Button
                   key={index}
@@ -199,7 +225,7 @@ const HomeScreen = () => {
         </div>
       </div>
       {/* Right Column */}
-      <div className="w-[60%] bg-white p-4">
+      <div className="w-[50%] bg-white p-4">
         <div>
           <h2 className="text-2xl font-bold break-words">Exploration Plans</h2>
 

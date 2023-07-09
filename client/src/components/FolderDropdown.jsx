@@ -1,8 +1,33 @@
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useRef, useState } from "react";
-import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
-export default function FolderDropdown() {
+import { useDispatch, useSelector } from "react-redux";
+import { clearFolderName } from "../slices/userFolderSlice";
+import BASE_URL from "../serverInfo";
+
+export default function FolderDropdown(folderName) {
+  const folders = useSelector((state) => state.folder.folder);
+  const dispatch = useDispatch();
+
+  const setUserFolderList = async (folder) => {
+    const updatedfolder = folder;
+    const userId = localStorage.getItem("_id");
+    // console.log(updatedfolder, userId);
+
+    await fetch(`${BASE_URL}/api/users/${userId}`, {
+      method: "PATCH", // HTTP method
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ data: updatedfolder }),
+    })
+      .then((res) => res.json())
+      .then((result) => {
+        // console.log("----- folder update -----", result);
+      })
+      .catch((err) => console.log(err));
+  };
+
   return (
     <div className="text-right">
       <Menu as="div" className="relative inline-block text-left">
@@ -38,31 +63,12 @@ export default function FolderDropdown() {
               <Menu.Item>
                 {({ active }) => (
                   <button
-                    className={`${
-                      active ? "bg-violet-500 text-white" : "text-gray-900"
-                    } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
-                  >
-                    {active ? (
-                      <EditActiveIcon
-                        className="mr-2 h-5 w-5"
-                        aria-hidden="true"
-                      />
-                    ) : (
-                      <EditInactiveIcon
-                        className="mr-2 h-5 w-5"
-                        aria-hidden="true"
-                      />
-                    )}
-                    Edit
-                  </button>
-                )}
-              </Menu.Item>
-            </div>
-
-            <div className="px-1 py-1">
-              <Menu.Item>
-                {({ active }) => (
-                  <button
+                    onClick={() => {
+                      dispatch(clearFolderName(folderName.folderName));
+                      setUserFolderList(
+                        folders.filter((f) => f !== folderName.folderName)
+                      );
+                    }}
                     className={`${
                       active ? "bg-violet-500 text-white" : "text-gray-900"
                     } group flex w-full items-center rounded-md px-2 py-2 text-sm`}

@@ -1,7 +1,9 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState } from "react";
+import { Fragment, useState, useRef } from "react";
 
 export default function MyModal({ isOpen, closeModal, addUserFolder }) {
+  const folderNameRef = useRef();
+
   return (
     <>
       <Transition appear show={isOpen} as={Fragment}>
@@ -41,6 +43,7 @@ export default function MyModal({ isOpen, closeModal, addUserFolder }) {
                       type="text"
                       className="py-2 w-[100%] px-4 rounded my-2 border-2 border-blue-500 border-solid outline-none"
                       placeholder="Folder name"
+                      ref={folderNameRef}
                     />
                   </div>
 
@@ -48,7 +51,10 @@ export default function MyModal({ isOpen, closeModal, addUserFolder }) {
                     <button
                       type="button"
                       className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                      onClick={addUserFolder}
+                      onClick={() => {
+                        addUserFolder(folderNameRef.current.value);
+                        closeModal();
+                      }}
                     >
                       Submit
                     </button>
