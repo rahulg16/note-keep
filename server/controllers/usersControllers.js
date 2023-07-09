@@ -55,4 +55,23 @@ const getUserDetails = async (req, res) => {
   }
 };
 
-export { getAllUserDetails, addUserFolder, getUserDetails };
+const updateUserFolder = async (req, res) => {
+  const { id } = req.params;
+  const { data } = req.body;
+
+  let user = await Users.findByIdAndUpdate({ _id: id }, { userFolders: data });
+
+  try {
+    res.status(200).json({
+      message: "success",
+      data: user,
+    });
+  } catch (err) {
+    res.status(200).json({
+      message: "fail",
+      data: err.message,
+    });
+  }
+};
+
+export { getAllUserDetails, addUserFolder, getUserDetails, updateUserFolder };

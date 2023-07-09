@@ -13,7 +13,7 @@ function Button({icon, buttonName, onClick, isMore}) {
         <h4 className="ml-4 break-words text-sm font-medium">{buttonName}</h4>
       </div>
 
-      {isMore && <FolderDropdown />}
+      {isMore && <FolderDropdown folderName={buttonName} />}
     </div>
   );
 }
