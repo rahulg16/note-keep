@@ -7,6 +7,7 @@ import { clearToken } from "../slices/userAuthSlice";
 import BASE_URL from "../serverInfo";
 import Alert from "../util/Alert";
 import MyModal from "../components/AddFolderModal";
+import AddNoteModal from "../components/AddNoteModal";
 
 const HomeScreen = () => {
   const [selectedNote, setSelectedNote] = useState(false);
@@ -16,11 +17,13 @@ const HomeScreen = () => {
   let [alertMessage, setAlertMessage] = useState("");
   let [alertType, setAlertType] = useState("");
   let [isAddFolderOpen, setIsAddFolderOpen] = useState(false)
+  let [isAddNoteOpen, setIsAddNoteOpen] = useState(false);
 
   const dispatch = useDispatch();
 
   useEffect(() => {
     fetchUserDetails();
+    fetchUserNotes("My Notes");
   }, []);
 
   const handleNoteClick = (note) => {
@@ -28,10 +31,11 @@ const HomeScreen = () => {
   };
 
   const handleAddNote = () => {
-    if (newNote.trim() !== "") {
-      setNotes([...notes, newNote]);
-      setNewNote("");
-    }
+    // if (newNote.trim() !== "") {
+    //   setNotes([...notes, newNote]);
+    //   setNewNote("");
+    // }
+    setIsAddNoteOpen(true)
   };
 
   function closeModal() {
@@ -49,6 +53,19 @@ const HomeScreen = () => {
       .catch((err) => console.log("Error -> fetchUserDetails:", err));
   }
 
+
+  async function fetchUserNotes(queryType) {
+    let userID = localStorage.getItem("_id");
+
+    await fetch(`${BASE_URL}/api/users/note/${userID}?type=${queryType}`)
+      .then((res) => res.json())
+      .then((result) => {
+        console.log("fetchUserNotes result", result);
+        setNotes(result?.data);
+      })
+      .catch((err) => console.log("Error -> fetchUserDetails:", err));
+  }
+
   async function addUserFolder() {
     let userID = localStorage.getItem("_id");
 
@@ -62,6 +79,40 @@ const HomeScreen = () => {
       .then((res) => res.json())
       .then((result) => {
         console.log("addUserFolder", result);
+      })
+      .catch((err) => console.log("Error -> addUserFolder:", err));
+  }
+
+  async function addNewNote(title, description) {
+    let userID = localStorage.getItem("_id");
+
+    if (title.length == 0 || description.length == 0) {
+      return;
+    }
+
+    await fetch(`${BASE_URL}/api/users/note`, {
+      method: "POST", // HTTP method
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        authorId: userID,
+        type: "My Notes",
+        title: title,
+        description: description,
+      }),
+    })
+      .then((res) => res.json())
+      .then((result) => {
+        console.log("addUserFolder", result);
+        setNotes((prevNotes) => [
+          ...prevNotes,
+          {
+            id: document._id,
+            title: title,
+            description: description
+          },
+        ]);
       })
       .catch((err) => console.log("Error -> addUserFolder:", err));
   }
@@ -192,10 +243,17 @@ const HomeScreen = () => {
         </div>
 
         <div className="flex flex-col min-h-[80%]">
-          <NoteBlock
-            onClick={() => setSelectedNote((p) => !p)}
-            isSelected={selectedNote}
-          />
+          {notes.map((note, index) => {
+            return (
+              <NoteBlock
+                key={index}
+                title={note.title}
+                description={note.description}
+                onClick={() => setSelectedNote((p) => !p)}
+                isSelected={selectedNote}
+              />
+            );
+          })}
         </div>
       </div>
       {/* Right Column */}
@@ -216,6 +274,13 @@ const HomeScreen = () => {
         closeModal={closeModal}
         addUserFolder={addUserFolder}
       />
+
+      <AddNoteModal
+        isOpen={isAddNoteOpen}
+        closeModal={() => setIsAddNoteOpen(false)}
+        addNewNote={addNewNote}
+      />
+
       {alertMessage.length > 0 && (
         <Alert alertMessage={alertMessage} type={alertType} />
       )}
