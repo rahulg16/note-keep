@@ -1,7 +1,11 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState, useRef, useEffect } from "react";
 
+import { useSelector } from "react-redux";
+
 export default function AddNoteModal({ isOpen, closeModal, addNewNote }) {
+  const folderType = useSelector((state) => state.folder.selectedFolder);
+
   const titleRef = useRef();
   const descriptionRef = useRef();
 
@@ -62,12 +66,14 @@ export default function AddNoteModal({ isOpen, closeModal, addNewNote }) {
                     <button
                       type="button"
                       className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                      onClick={() =>
+                      onClick={() => {
                         addNewNote(
                           titleRef.current.value,
-                          descriptionRef.current.value
-                        )
-                      }
+                          descriptionRef.current.value,
+                          folderType
+                        );
+                        closeModal();
+                      }}
                     >
                       Submit
                     </button>

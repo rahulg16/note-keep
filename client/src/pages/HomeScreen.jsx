@@ -20,13 +20,15 @@ const HomeScreen = () => {
   const folders = useSelector((state) => state.folder.folder);
   const folderName = useSelector((state) => state.folder.selectedFolder);
 
-  const [selectedNote, setSelectedNote] = useState(false);
   const [notes, setNotes] = useState([]);
-  const [newNote, setNewNote] = useState("");
+  const [currentNote, setCurrentNote] = useState({
+    title: "select note to view title",
+    description: "select note to view details",
+  });
   let [userData, setUserData] = useState({});
   let [alertMessage, setAlertMessage] = useState("");
   let [alertType, setAlertType] = useState("");
-  let [isAddFolderOpen, setIsAddFolderOpen] = useState(false)
+  let [isAddFolderOpen, setIsAddFolderOpen] = useState(false);
   let [isAddNoteOpen, setIsAddNoteOpen] = useState(false);
 
   const dispatch = useDispatch();
@@ -39,10 +41,6 @@ const HomeScreen = () => {
     fetchUserNotes(folderName);
   }, [folderName]);
 
-  const handleNoteClick = (note) => {
-    setSelectedNote(note);
-  };
-
   function showAlertPopup(alertMsg, type) {
     setAlertMessage(alertMsg);
     setAlertType(type);
@@ -54,8 +52,7 @@ const HomeScreen = () => {
   }
 
   const handleAddNote = () => {
-
-    setIsAddNoteOpen(true)
+    setIsAddNoteOpen(true);
   };
 
   function closeModal() {
@@ -73,7 +70,6 @@ const HomeScreen = () => {
       })
       .catch((err) => console.log("Error -> fetchUserDetails:", err));
   }
-
 
   async function fetchUserNotes(queryType) {
     let userID = localStorage.getItem("_id");
@@ -111,11 +107,11 @@ const HomeScreen = () => {
       .catch((err) => console.log("Error -> addUserFolder:", err));
   }
 
-  async function addNewNote(title, description) {
+  async function addNewNote(title, description, type) {
     let userID = localStorage.getItem("_id");
 
-    if (title.length == 0 || description.length == 0) {
-      return;
+    if (title.length == 0 || description.length == 0 || !type) {
+      return showAlertPopup("please select type of document", "warning");
     }
 
     await fetch(`${BASE_URL}/api/users/note`, {
@@ -125,7 +121,7 @@ const HomeScreen = () => {
       },
       body: JSON.stringify({
         authorId: userID,
-        type: "My Notes",
+        type: type,
         title: title,
         description: description,
       }),
@@ -133,14 +129,7 @@ const HomeScreen = () => {
       .then((res) => res.json())
       .then((result) => {
         console.log("addUserFolder", result);
-        setNotes((prevNotes) => [
-          ...prevNotes,
-          {
-            id: document._id,
-            title: title,
-            description: description
-          },
-        ]);
+        setNotes((prevNotes) => [...prevNotes, result.data.document]);
       })
       .catch((err) => console.log("Error -> addUserFolder:", err));
   }
@@ -247,7 +236,9 @@ const HomeScreen = () => {
       {/* Middle Column */}
       <div className="w-[30%] bg-white p-4 border-r-2 border-gray-200 border-solid">
         <div className="mb-4 flex flex-col">
-          <h2 className="text-2xl font-bold flex-grow mb-6">My Notes</h2>
+          <h2 className="text-2xl font-bold flex-grow mb-6">
+            {folderName ? folderName : "Select Folder"}
+          </h2>
           <button
             className="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded flex items-center justify-start"
             onClick={handleAddNote}
@@ -271,15 +262,18 @@ const HomeScreen = () => {
           </button>
         </div>
 
-        <div className="flex flex-col min-h-[80%]">
+        <div className="flex flex-col max-h-[80vh] overflow-y-auto scrollbar-hide ">
           {notes.map((note, index) => {
             return (
               <NoteBlock
                 key={index}
                 title={note.title}
                 description={note.description}
-                onClick={() => setSelectedNote((p) => !p)}
-                isSelected={selectedNote}
+                onClick={() => {
+                  setCurrentNote(note);
+                }}
+                isSelected={currentNote.title}
+                date={note.createdAt}
               />
             );
           })}
@@ -288,14 +282,11 @@ const HomeScreen = () => {
       {/* Right Column */}
       <div className="w-[50%] bg-white p-4">
         <div>
-          <h2 className="text-2xl font-bold break-words">Exploration Plans</h2>
+          <h2 className="text-2xl font-bold break-words">
+            {currentNote.title}
+          </h2>
 
-          <p className="my-4 ">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Eos
-            exercitationem, fuga expedita explicabo saepe molestiae, rem
-            sapiente dolorum quod, laborum perferendis ipsam facere porro. Atque
-            iusto assumenda facilis exercitationem quaerat.
-          </p>
+          <p className="my-4 ">{currentNote.description}</p>
         </div>
       </div>
       <MyModal

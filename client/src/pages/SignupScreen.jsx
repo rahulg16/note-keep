@@ -50,10 +50,10 @@ const SignUpScreen = () => {
 
     if (response.message === "success") {
       const token = response?.token;
-      const userID = response;
+      const userID = response?.data?.id;
       console.log(userID);
       localStorage.setItem("auth", token);
-      // localStorage.setItem("_id", userID);
+      localStorage.setItem("_id", userID);
       dispatch(setToken(token));
       navigate("/");
     }

@@ -34,8 +34,9 @@ const userSchema = new mongoose.Schema({
   },
 
   userFolders: {
-    type: [String]
-  }
+    type: [String],
+    default: ["Notes", "To-Do"],
+  },
 });
 
 // Document middleware
