@@ -15,6 +15,7 @@ import {
   addFolderName,
   setSelectedFolderName,
 } from "../slices/userFolderSlice";
+import ViewNotes from "../components/ViewNotes";
 
 const HomeScreen = () => {
   const folders = useSelector((state) => state.folder.folder);
@@ -30,6 +31,8 @@ const HomeScreen = () => {
   let [alertType, setAlertType] = useState("");
   let [isAddFolderOpen, setIsAddFolderOpen] = useState(false);
   let [isAddNoteOpen, setIsAddNoteOpen] = useState(false);
+  let [updateNote, setUpdateNote] = useState(false);
+  const [updateNoteId, setUpdateNoteId] = useState();
 
   const dispatch = useDispatch();
 
@@ -134,10 +137,43 @@ const HomeScreen = () => {
       .catch((err) => console.log("Error -> addUserFolder:", err));
   }
 
+  const updateNoteHandlerfunction = async (title, description) => {
+    const updateId = updateNoteId;
+    const dataObj = {};
+
+    const note = notes.filter((n) => n._id === updateId);
+
+    if (title) dataObj.title = title;
+    if (description) dataObj.description = description;
+
+    await fetch(`${BASE_URL}/api/users/note/${updateId}`, {
+      method: "PATCH", // HTTP method
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(dataObj),
+    })
+      .then((res) => res.json())
+      .then((result) => {
+        console.log("update note", result);
+        fetchUserNotes(folderName);
+      })
+      .catch((err) => console.log("Error -> updated note:", err));
+  };
+
   async function logOut() {
     dispatch(clearToken(localStorage.clear("auth")));
     location.reload();
   }
+
+  const removeNoteHandler = (id) => {
+    const updatednoteArr = notes.filter((note) => note._id !== id);
+    setNotes(updatednoteArr);
+    setCurrentNote({
+      title: "select note to view title",
+      description: "select note to view details",
+    });
+  };
 
   return (
     <div className="flex w-screen h-screen bg-gray-200">
@@ -274,20 +310,19 @@ const HomeScreen = () => {
                 }}
                 isSelected={currentNote.title}
                 date={note.createdAt}
+                noteId={note._id}
+                removeNote={removeNoteHandler}
+                updateNote={setIsAddNoteOpen}
+                setUpdateHandler={setUpdateNote}
+                updateIdHandler={setUpdateNoteId}
               />
             );
           })}
         </div>
       </div>
       {/* Right Column */}
-      <div className="w-[50%] bg-white p-4 overflow-y-auto max-h-[100vh] scrollbar-hide">
-        <div>
-          <h2 className="text-4xl font-bold break-words">
-            {currentNote.title}
-          </h2>
-
-          <p className="my-4 ">{currentNote.description}</p>
-        </div>
+      <div className="w-[50%] bg-white p-4">
+        <ViewNotes currentNote={currentNote} folder={folderName} />
       </div>
       <MyModal
         isOpen={isAddFolderOpen}
@@ -297,8 +332,13 @@ const HomeScreen = () => {
 
       <AddNoteModal
         isOpen={isAddNoteOpen}
-        closeModal={() => setIsAddNoteOpen(false)}
+        closeModal={() => {
+          setIsAddNoteOpen(false);
+          setUpdateNote(false);
+        }}
         addNewNote={addNewNote}
+        updateStatus={updateNote}
+        updateNoteHandler={updateNoteHandlerfunction}
       />
 
       {alertMessage.length > 0 && (
