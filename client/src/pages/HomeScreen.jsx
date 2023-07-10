@@ -280,9 +280,9 @@ const HomeScreen = () => {
         </div>
       </div>
       {/* Right Column */}
-      <div className="w-[50%] bg-white p-4">
+      <div className="w-[50%] bg-white p-4 overflow-y-auto max-h-[100vh] scrollbar-hide">
         <div>
-          <h2 className="text-2xl font-bold break-words">
+          <h2 className="text-4xl font-bold break-words">
             {currentNote.title}
           </h2>
 
