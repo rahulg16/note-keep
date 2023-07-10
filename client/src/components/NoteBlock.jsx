@@ -1,31 +1,36 @@
-import React from 'react'
+import React from "react";
 
-function NoteBlock({isSelected, onClick, title, description, date}) {
+function NoteBlock({ isSelected, onClick, title, description, date }) {
+  const day = new Date(date).getDate();
+  const month = new Date(date).getMonth() + 1;
+  const year = new Date(date).getFullYear();
+
+  // console.log(date);
 
   return (
     <div
       className={`w-[100%] h-[9rem] px-2 py-2 mb-4 rounded-lg ${
-        isSelected ? "bg-gray-200" : "bg-[#fbfbfb]"
-      }`}
+        isSelected === title ? "bg-gray-200" : "bg-slate-200/50"
+      } cursor-pointer`}
       onClick={onClick}
     >
       <p
         className={`font-bold text-xs ${
-          isSelected ? "text-black" : "text-gray-400"
+          isSelected === title ? "text-black" : "text-gray-400"
         }`}
       >
-        20 APR
+        {`${day}-${month}-${year}`}
       </p>
       <h2
         className={`font-bold text-lg  my-2 ${
-          isSelected ? "text-black" : "text-gray-400"
+          isSelected === title ? "text-black" : "text-gray-400"
         }`}
       >
         {title}
       </h2>
       <p
         className={`font-bold text-sm ${
-          isSelected ? "text-black" : "text-gray-400"
+          isSelected === title ? "text-black" : "text-gray-400"
         } break-words`}
       >
         {description}
@@ -34,4 +39,4 @@ function NoteBlock({isSelected, onClick, title, description, date}) {
   );
 }
 
-export default NoteBlock
+export default NoteBlock;
