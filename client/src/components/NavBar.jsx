@@ -16,7 +16,12 @@ function NavBar() {
 
   return (
     <div className="w-screen p-[20px] flex flex-row justify-between items-center">
-      <h2 className="font-semibold font-serif text-xl">Note Keep</h2>
+      <h2
+        className="font-semibold font-serif text-xl cursor-pointer"
+        onClick={() => navigate("/")}
+      >
+        Note Keep
+      </h2>
 
       <div className="w-[180px] flex flex-row justify-between">
         {navbarPaths.map((nav, i) => {
