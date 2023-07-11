@@ -108,12 +108,12 @@ const LoginScreen = () => {
               >
                 Sign In
               </button>
-              <a
+              {/* <a
                 className="inline-block align-baseline font-bold text-sm text-black hover:text-gray-700"
                 href="/"
               >
                 Forgot Password?
-              </a>
+              </a> */}
             </div>
           </form>
         </div>
