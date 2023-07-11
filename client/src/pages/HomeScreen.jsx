@@ -23,8 +23,8 @@ const HomeScreen = () => {
 
   const [notes, setNotes] = useState([]);
   const [currentNote, setCurrentNote] = useState({
-    title: "select note to view title",
-    description: "select note to view details",
+    title: "Select note to view title",
+    description: "Select note to view details",
   });
   let [userData, setUserData] = useState({});
   let [alertMessage, setAlertMessage] = useState("");
@@ -32,10 +32,11 @@ const HomeScreen = () => {
   let [isAddFolderOpen, setIsAddFolderOpen] = useState(false);
   let [isAddNoteOpen, setIsAddNoteOpen] = useState(false);
   let [updateNote, setUpdateNote] = useState(false);
+  const [selectedNoteIndex, setSelectedNoteIndex] = useState(0);
   const [updateNoteId, setUpdateNoteId] = useState();
 
   const dispatch = useDispatch();
-
+  
   useEffect(() => {
     fetchUserDetails();
   }, []);
@@ -43,6 +44,20 @@ const HomeScreen = () => {
   useEffect(() => {
     fetchUserNotes(folderName);
   }, [folderName]);
+
+  useEffect(() => {
+    if (Boolean(notes[selectedNoteIndex])) {
+      setCurrentNote(notes[selectedNoteIndex]);
+    }
+  }, [notes])
+
+  useEffect(() => {
+    console.log("folder changed redux");
+    if(folders.length == 0 && notes.length != 0) {
+      setNotes([])
+      dispatch(setSelectedFolderName(""));
+    }
+  }, [folders]);
 
   function showAlertPopup(alertMsg, type) {
     setAlertMessage(alertMsg);
@@ -55,6 +70,10 @@ const HomeScreen = () => {
   }
 
   const handleAddNote = () => {
+    setCurrentNote({
+      title: "Select note to view title",
+      description: "Select note to view details",
+    });
     setIsAddNoteOpen(true);
   };
 
@@ -82,8 +101,15 @@ const HomeScreen = () => {
       .then((result) => {
         console.log("fetchUserNotes result", result);
         setNotes(result?.data);
+
+        if (result.data.length == 0) {
+          setCurrentNote({
+            title: "Select note to view title",
+            description: "Select note to view details",
+          });
+        }
       })
-      .catch((err) => console.log("Error -> fetchUserDetails:", err));
+      .catch((err) => console.log("Error -> fetchUserNotes:", err));
   }
 
   async function addUserFolder(folderName) {
@@ -104,7 +130,13 @@ const HomeScreen = () => {
       .then((res) => res.json())
       .then((result) => {
         console.log("addUserFolder", result);
-        if (result.message === "fail") throw new Error("practice more");
+
+        if (result.message == "success") {
+          showAlertPopup("Folder added", "success");
+        } else {
+          showAlertPopup("Something went wrong", "error");
+        }
+
         dispatch(addFolderName(folderName));
       })
       .catch((err) => console.log("Error -> addUserFolder:", err));
@@ -132,6 +164,13 @@ const HomeScreen = () => {
       .then((res) => res.json())
       .then((result) => {
         console.log("addUserFolder", result);
+
+        if (result.message == "success") {
+          showAlertPopup("Note added", "success");
+        } else {
+          showAlertPopup("Something went wrong", "error");
+        }
+
         setNotes((prevNotes) => [...prevNotes, result.data.document]);
       })
       .catch((err) => console.log("Error -> addUserFolder:", err));
@@ -156,6 +195,11 @@ const HomeScreen = () => {
       .then((res) => res.json())
       .then((result) => {
         console.log("update note", result);
+        if (result.message == "success") {
+          showAlertPopup("Note updated", "success")
+        } else {
+          showAlertPopup("Something went wrong", "error");
+        }
         fetchUserNotes(folderName);
       })
       .catch((err) => console.log("Error -> updated note:", err));
@@ -171,7 +215,7 @@ const HomeScreen = () => {
     setNotes(updatednoteArr);
     setCurrentNote({
       title: "select note to view title",
-      description: "select note to view details",
+      description: "Select note to view details",
     });
   };
 
@@ -275,27 +319,29 @@ const HomeScreen = () => {
           <h2 className="text-2xl font-bold flex-grow mb-6">
             {folderName ? folderName : "Select Folder"}
           </h2>
-          <button
-            className="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded flex items-center justify-start"
-            onClick={handleAddNote}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-6 h-6"
+          {Boolean(folderName) && (
+            <button
+              className="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded flex items-center justify-start"
+              onClick={handleAddNote}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 4.5v15m7.5-7.5h-15"
-              />
-            </svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-6 h-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 4.5v15m7.5-7.5h-15"
+                />
+              </svg>
 
-            <p className="font-semibold ml-4">Add Note</p>
-          </button>
+              <p className="font-semibold ml-4">Add Note</p>
+            </button>
+          )}
         </div>
 
         <div className="flex flex-col max-h-[80vh] overflow-y-auto scrollbar-hide ">
@@ -307,6 +353,7 @@ const HomeScreen = () => {
                 description={note.description}
                 onClick={() => {
                   setCurrentNote(note);
+                  setSelectedNoteIndex(index);
                 }}
                 isSelected={currentNote.title}
                 date={note.createdAt}
@@ -315,6 +362,7 @@ const HomeScreen = () => {
                 updateNote={setIsAddNoteOpen}
                 setUpdateHandler={setUpdateNote}
                 updateIdHandler={setUpdateNoteId}
+                showAlertPopup={showAlertPopup}
               />
             );
           })}
@@ -336,9 +384,11 @@ const HomeScreen = () => {
           setIsAddNoteOpen(false);
           setUpdateNote(false);
         }}
+        currentNote={currentNote}
         addNewNote={addNewNote}
         updateStatus={updateNote}
         updateNoteHandler={updateNoteHandlerfunction}
+        showAlertPopup={showAlertPopup}
       />
 
       {alertMessage.length > 0 && (

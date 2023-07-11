@@ -9,8 +9,20 @@ export default function AddNoteModal({
   addNewNote,
   updateStatus,
   updateNoteHandler,
+  currentNote,
+  showAlertPopup,
 }) {
   const folderType = useSelector((state) => state.folder.selectedFolder);
+
+  let [title, setTitle] = useState("");
+  let [description, setDescription] = useState("");
+
+  useEffect(() => {
+    if (!currentNote.title.includes("Select note")) {
+      setTitle(currentNote.title);
+      setDescription(currentNote.description);
+    }
+  }, [updateStatus]);
 
   const titleRef = useRef();
   const descriptionRef = useRef();
@@ -52,18 +64,22 @@ export default function AddNoteModal({
                   <div className="mt-2">
                     <input
                       type="text"
+                      value={title}
                       className="py-2 w-[100%] font-semibold text-xl px-4 rounded my-2 outline-none border-2 border-solid border-black-500"
                       placeholder="Title"
                       ref={titleRef}
+                      onChange={(e) => setTitle(e.target.value)}
                     />
 
                     <textarea
+                      value={description}
                       name="note"
                       id="note"
                       cols="30"
                       rows="10"
                       placeholder="Take a note..."
                       ref={descriptionRef}
+                      onChange={(e) => setDescription(e.target.value)}
                       className="w-[100%] px-4 py-2 border-2 resize-none border-solid border-black-500 outline-none rounded min-h-[50vh] max-h-[60vh]"
                     ></textarea>
                   </div>
