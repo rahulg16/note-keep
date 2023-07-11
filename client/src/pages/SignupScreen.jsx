@@ -165,7 +165,7 @@ const SignUpScreen = () => {
               </button>
               <a
                 className="inline-block align-baseline font-bold text-sm text-black hover:text-gray-700"
-                href="/login"
+                href="#/login"
               >
                 Already have an account? Login
               </a>
@@ -173,7 +173,9 @@ const SignUpScreen = () => {
           </form>
         </div>
       </div>
-      {alertMessage.length > 0 &&<Alert alertMessage={alertMessage} type={alertType}/>}
+      {alertMessage.length > 0 && (
+        <Alert alertMessage={alertMessage} type={alertType} />
+      )}
     </>
   );
 };
