@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { setToken } from "../slices/userAuthSlice.js";
 import BASE_URL from "../serverInfo.js";
 import NavBar from "../components/NavBar.jsx";
+import Alert from "../util/Alert.jsx";
 
 const initialState = {
   userName: "test",
@@ -35,7 +36,8 @@ const SignUpScreen = () => {
   const dispatch = useDispatch();
 
   const [userData, userDispatch] = useReducer(reducer, initialState);
-
+  let [alertMessage, setAlertMessage] = useState("");
+  let [alertType, setAlertType] = useState("");
   const navigate = useNavigate();
 
   const signUpUserHandler = async (e) => {
@@ -53,14 +55,27 @@ const SignUpScreen = () => {
       const token = response?.token;
       const userID = response?.data?.id;
       console.log(userID);
+      showAlertPopup("Congratulations, your account has been successfully created.", "success")
       localStorage.setItem("auth", token);
       localStorage.setItem("_id", userID);
       dispatch(setToken(token));
       navigate("/");
+    } else {
+      showAlertPopup("Something went wrong", "error")
     }
 
     console.log("<<<<<<<< response >>>>>>>>>", response);
   };
+
+  function showAlertPopup(alertMsg, type) {
+    setAlertMessage(alertMsg);
+    setAlertType(type);
+
+    setTimeout(() => {
+      setAlertMessage("");
+      setAlertType("");
+    }, 2000);
+  }
 
   return (
     <>
@@ -158,6 +173,7 @@ const SignUpScreen = () => {
           </form>
         </div>
       </div>
+      {alertMessage.length > 0 &&<Alert alertMessage={alertMessage} type={alertType}/>}
     </>
   );
 };

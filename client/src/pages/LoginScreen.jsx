@@ -1,11 +1,12 @@
 import React from "react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useSelector, useDispatch } from "react-redux";
 import { setToken } from "../slices/userAuthSlice.js";
 import BASE_URL from "../serverInfo.js";
 import NavBar from "../components/NavBar.jsx"
+import Alert from "../util/Alert.jsx";
 
 const LoginScreen = () => {
   const token = useSelector((state) => state.auth.token);
@@ -13,6 +14,9 @@ const LoginScreen = () => {
 
   const emailRef = useRef();
   const passwordRef = useRef();
+
+  let [alertMessage, setAlertMessage] = useState("");
+  let [alertType, setAlertType] = useState("");
 
   const navigate = useNavigate();
 
@@ -38,11 +42,26 @@ const LoginScreen = () => {
       localStorage.setItem("auth", token);
       localStorage.setItem("_id", userID);
       dispatch(setToken(token));
-      navigate("/");
+      showAlertPopup("Login successful", "success");
+      setTimeout(() => {
+        navigate("/");
+      }, 1000)
+    } else {
+      showAlertPopup("Something went wrong", "error");
     }
 
     console.log("<<<<<<<< response >>>>>>>>>", response);
   };
+
+  function showAlertPopup(alertMsg, type) {
+    setAlertMessage(alertMsg);
+    setAlertType(type);
+
+    setTimeout(() => {
+      setAlertMessage("");
+      setAlertType("");
+    }, 2000);
+  }
 
   return (
     <>
@@ -89,16 +108,19 @@ const LoginScreen = () => {
               >
                 Sign In
               </button>
-              <a
+              {/* <a
                 className="inline-block align-baseline font-bold text-sm text-black hover:text-gray-700"
                 href="/"
               >
                 Forgot Password?
-              </a>
+              </a> */}
             </div>
           </form>
         </div>
       </div>
+      {alertMessage.length > 0 && (
+        <Alert alertMessage={alertMessage} type={alertType} />
+      )}
     </>
   );
 };

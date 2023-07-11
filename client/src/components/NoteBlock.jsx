@@ -2,6 +2,7 @@ import React from "react";
 import BASE_URL from "../serverInfo";
 import { AiFillDelete } from "react-icons/ai";
 import { BiSolidEditAlt } from "react-icons/bi";
+import Alert from "../util/Alert";
 
 let months = {
   1: "JAN",
@@ -29,6 +30,7 @@ function NoteBlock({
   updateNote,
   setUpdateHandler,
   updateIdHandler,
+  showAlertPopup,
 }) {
   const day = new Date(date).getDate();
   const month = new Date(date).getMonth() + 1;
@@ -43,6 +45,12 @@ function NoteBlock({
     })
       .then((res) => res.json())
       .then((result) => {
+        if (result.message == "success") {
+          showAlertPopup("Note deleted", "success");
+        } else {
+          showAlertPopup("Something went wrong", "error");
+        }
+
         removeNote(id);
       })
       .catch((err) => console.log(err));
