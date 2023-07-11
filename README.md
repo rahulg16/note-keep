@@ -8,9 +8,9 @@
 - CRUD: User can create, read, update, delete notes created by them.
 - Folders: User can categorize his notes into different folder ex: Journal, To-Do etc.
 
-## Project Screenshot
+## Application preview
 
-![Example Screenshot](images/screenshot.png)
+![Example Screenshot](client/src/assets/application_preview.png)
 
 
 # Technologies used
